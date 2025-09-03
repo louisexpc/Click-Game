@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Click Game</title>
+        <link rel="stylesheet" href="style.css">
+        <script src="script.js" defer></script>
+    </head>
+    <body>
+        <!-- ★ 用 div 包 canvas，方便加邊框 & 置中 -->
+        <div id="game-wrap">
+            <canvas id="main-screen" width="800" height="800"></canvas>
+            <canvas id="side-screen" width="800" height="300"></canvas>
+        </div>
+
+        <!-- 升級欄保持不動 -->
+        <div id="upgrade-panel">
+            <h2>角色升級</h2>
+            <div id="character-upgrade-list"></div> <!-- 子項目 -->
+        </div>
+
+
+        <!-- ★ 將 score 與 click-state 包一起，便於 flex 排版 -->
+        <div id="meta-wrap">
+            <p id="score">0</p>
+            <p id="click-state"></p>
+        </div>
+        <!-- ★ 獨立的 log 區塊 -->
+        <div id="game-log">
+            <h2>活動紀錄</h2>
+            <!-- HTML -->
+            <div id="log-panel"></div>
+
+        </div>
+    </body>
+</html>

@@ -1,0 +1,185 @@
+[
+  {
+    "type": "Jerry",
+    "img": "jerry.png",
+    "unlock":true,
+    "maximun":1000,
+    "reward":10000,
+    "sx":0,
+    "sy":212,
+    "width": 74,
+    "height": 74,
+    "frameCount": 4,
+    "frameDuration": 80,
+    "moveInterval": 1500,
+    "upgradeInfo":{
+      "addAmount":{
+        "desc":"增加Jerry 數量",
+        "price":100,
+        "priceFactor":1.5
+      }
+    }
+  },
+  {
+    "type": "Tom",
+    "img": "tom.png",
+    "unlock":false,
+    "unlockPrice":500,
+    "maximun":1000,
+    "sx":0,
+    "sy":504,
+    "width": 122,
+    "height":110,
+    "frameCount": 3,
+    "frameDuration": 80,
+    "moveInterval": 1500,
+    "upgradeInfo":{
+      "buyOne":{
+        "desc":"More Click-Power",
+        "price":100,
+        "priceFactor":2
+      }
+    }
+  },
+  {
+    "type": "Grandma",
+    "img": "grandma.png",
+    "unlock":false,
+    "unlockPrice":500,
+    "maximun":2,
+    "range_w":200,
+    "range_h":200,
+    "sx":0,
+    "sy":394,
+    "width":140,
+    "height":180,
+    "frameCount":5,
+    "frameDuration": 100,
+    "actionInterval": 5000,
+    "flashDuration": 3000,
+    "upgradeInfo":{
+        "addAmount":{
+            "desc":" every 25s a grandma will appear and catch Jerrys in a certain square range, after 25s, if there is no other grandmas, rest 25s.",
+            "price":1300,
+            "priceFactor":2
+        },
+        "reduceCD":{
+            "desc":"Reduce CD by 5%/time",
+            "price":2000,
+            "priceFactor":1.5
+        }
+    }
+  },
+  {
+    "type": "Godzilla",
+    "img": "godzilla.png",
+    "sx":0,
+    "sy":0,
+    "width":100,
+    "height":101,
+    "range_h":200,
+    "range_w":800,
+    "frameCount" : 5,
+    "frameDuration" :160,
+    "limit": 2,
+    "flashDuration":800,
+    "actionInterval":3000,
+    "unlock":false,
+    "unlockPrice":1000,
+    "upgradeInfo":{
+        "buyOne":{
+            "desc":"When Bought, Clear all the Jerrys in a random row",
+            "price":700,
+            "priceFactor":1.1
+        },
+        "increaseRange":{
+            "desc":"When Bought, Increases the Range by 5%",
+            "price":500,
+            "priceFactor":1.5
+        }
+    }
+  },
+  {
+      "type": "Trap",
+      "img": "trap.png",
+      "moveInterval":3000,
+      "unlock":true,
+      "reward":-50,
+      "sx":530,
+      "sy":290,
+      "width":100,
+      "height":70,
+      "frameCount":3,
+      "frameDuration":200,
+      "upgradeInfo":{}
+  },
+  {
+        "type":"Dog",
+        "img":"dog.png",
+        "unlock":false,
+        "unlockPrice":199,
+        "maximun":1,
+        "actionInterval":10000,
+        "gainPoint":100,
+        "consumeBones":100,
+        "action1":{
+          "img":null,
+          "sx":0,
+          "sy":60,
+          "width":207,
+          "height":240,
+          "frameCount":3,
+          "frameDuration":200
+        },
+        "action2":{
+          "img":null,
+          "sx":381,
+          "sy":366,
+          "width":227,
+          "height":219,
+          "frameCount":1,
+          "frameDuration":200
+        },
+        "upgradeInfo":{
+            "buyBones":{
+                "desc":"Buy Bones to Feed the Spike!",
+                "price":100,
+                "priceFactor":1,
+                "amount":100
+            },
+            "upgrade":{
+              "desc":" -time , more points , consume more bones (5 time upgrade=+1 bone)",
+              "price":500,
+              "priceFactor":1.5,
+              "ratio":0.1
+            }
+        }
+
+  },
+  {
+    "type": "Bart_Simpson",
+    "img": "simpson.png",
+    "sx":0,
+    "sy":0,
+    "range_h":800,
+    "range_w":800,
+    "width":571,
+    "height":1343,
+    "frameCount":8,
+    "frameDuration":100,
+    "limit": 2,
+    "flashDuration":800,
+    "actionInterval":10000,
+    "unlock":false,
+    "unlockPrice":800,
+    "upgradeInfo":{
+        "buyOne":{
+            "desc":"When Bought, Clear all the Jerrys",
+            "price":3000,
+            "priceFactor":2
+        }
+    }
+
+  }
+
+]

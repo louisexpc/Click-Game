@@ -1,0 +1,326 @@
+/* =========================
+   Minimal Reset / Normalize
+   ========================= */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body, h1, h2, h3, h4, p, ul, ol, figure { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+img, canvas, svg, video { display: block; max-width: 100%; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { border: none; background: none; padding: 0; cursor: pointer; }
+:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+
+/* =========================
+   Design Tokens (CSS Vars)
+   ========================= */
+:root{
+  /* Color system - dark neutral base + teal primary + orange accent */
+  --color-bg: #0f172a;            /* deep navy / slate-900 */
+  --color-surface: #111827;       /* slate-800 */
+  --color-surface-2: #0b1220;     /* darker panel */
+  --color-border: #283042;        /* neutral border */
+  --color-text: #e5e7eb;          /* slate-200 */
+  --color-text-muted: #b6c0cf;    /* muted */
+  --color-primary: #22d3ee;       /* cyan-400 */
+  --color-primary-strong: #06b6d4;/* cyan-500 */
+  --color-accent: #f59e0b;        /* amber-500 */
+  --color-focus: #38bdf8;         /* sky-400 */
+
+  /* Elevation & Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
+  --shadow-md: 0 6px 16px rgba(0,0,0,.35);
+  --shadow-lg: 0 10px 24px rgba(0,0,0,.45);
+
+  /* Spacing scale (4px grid) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Typography */
+  --font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", "Hiragino Sans", "Microsoft JhengHei", Arial, sans-serif;
+  --fs-12: 12px;
+  --fs-14: 14px;
+  --fs-16: 16px;
+  --fs-18: 18px;
+  --fs-20: 20px;
+  --fs-24: 24px;
+  --fs-32: 32px;
+
+  /* Layout caps */
+  --container-max: 1200px;   /* page max width */
+  --canvas-max: 800px;       /* do NOT exceed intrinsic 800px to avoid upscale blur */
+  --sidecanvas-max: 800px;
+}
+
+/* =========================
+   Base
+   ========================= */
+body{
+  background: linear-gradient(180deg, #0c1324, var(--color-bg));
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: var(--fs-16);
+  line-height: 1.6;
+  min-height: 100vh;
+  padding: var(--space-6) var(--space-4) var(--space-12);
+  display: block; /* keep DOM order; we will center via element rules */
+}
+
+/* Headings */
+h1, h2, h3{
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.2px;
+}
+h2{ font-size: var(--fs-20); }
+h3{ font-size: var(--fs-18); }
+
+/* =========================
+   Main Stack: Game Area
+   - #main-screen on top
+   - #side-screen below
+   - both center-aligned
+   ========================= */
+#game-wrap{
+  width: 100%;
+  max-width: var(--canvas-max);
+  margin: 0 auto; /* center the stack block itself */
+  display: flex;
+  flex-direction: column; /* vertical stack requirement */
+  align-items: center;     /* center canvases horizontally */
+  gap: var(--space-4);
+}
+
+/* Canvas: keep aspect via height:auto; center; no stretch */
+#main-screen,
+#side-screen{
+  display: block;
+  width: 100%;                /* scale down responsively */
+  max-width: var(--canvas-max);/* never upscale beyond intrinsic 800px */
+  height: auto;               /* preserve aspect ratio */
+  background: #0b1020;        /* subtle canvas backing */
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  margin-inline: auto;        /* ensure centered even if detached */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* =========================
+   Meta Bar (Score + Click Hint)
+   ========================= */
+#meta-wrap{
+  max-width: var(--canvas-max);
+  margin: var(--space-4) auto var(--space-6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+  padding: var(--space-3) var(--space-4);
+  background: linear-gradient(180deg, var(--color-surface), var(--color-surface-2));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+#score{
+  font-size: var(--fs-32);
+  font-weight: 800;
+  color: var(--color-primary);
+  min-width: 4ch;
+  text-align: center;
+}
+#click-state{
+  font-size: var(--fs-14);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* =========================
+   Upgrade Panel
+   ========================= */
+#upgrade-panel{
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  margin-top: var(--space-6);
+  padding: var(--space-6);
+  background: linear-gradient(180deg, var(--color-surface), #0f172a 60%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+#upgrade-panel > h2{
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-primary);
+  margin-bottom: var(--space-4);
+}
+
+/* Upgrade list uses a responsive grid of cards */
+#character-upgrade-list{
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat( auto-fill, minmax(260px, 1fr) );
+}
+
+/* Character card */
+.character-panel{
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-height: 140px;
+}
+.character-panel h3{
+  font-size: var(--fs-18);
+  color: #ffffff;
+  border-left: 4px solid var(--color-accent);
+  padding-left: var(--space-3);
+}
+
+/* Upgrade items */
+.character-panel ul{ display: flex; flex-direction: column; gap: var(--space-2); }
+.character-panel li{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: rgba(255,255,255,0.02);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  min-height: 40px;
+  color: var(--color-text);
+}
+.character-panel li:last-child{ margin-bottom: 0; }
+
+/* Buttons (global styles kept simple; scoped fallback too) */
+button{
+  --btn-bg: var(--color-primary);
+  --btn-bg-hover: var(--color-primary-strong);
+  --btn-text: #0b1020;
+  --btn-border: transparent;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  min-height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--btn-border);
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  font-weight: 700;
+  letter-spacing: .2px;
+  transition: transform 150ms ease, background 150ms ease, box-shadow 150ms ease, filter 150ms ease;
+  box-shadow: 0 2px 0 rgba(0,0,0,.25);
+  text-shadow: 0 1px 0 rgba(255,255,255,0.06);
+}
+button:hover{ background: var(--btn-bg-hover); transform: translateY(-1px); }
+button:active{ transform: translateY(0); filter: brightness(0.95); }
+button[disabled], button:disabled{
+  opacity: .55; cursor: not-allowed; transform: none; filter: none;
+}
+
+/* Secondary & Ghost variants (by context if needed) */
+#upgrade-panel button{
+  /* keep primary for action clarity */
+}
+.character-panel li button{
+  margin-left: auto;
+}
+
+/* Emphasis tag style (optional accent text inside descriptions) */
+.emph{ color: var(--color-accent); font-weight: 700; }
+
+/* =========================
+   Game Log (overlay panel)
+   ========================= */
+#game-log h2{
+  margin: 0 0 var(--space-2) 0;
+  font-size: var(--fs-16);
+  color: #fff;
+}
+
+/* Keep existing fixed log-panel but theme it */
+#log-panel{
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: min(340px, 88vw);
+  height: 220px;
+  background: rgba(9, 14, 28, 0.86);
+  color: var(--color-text);
+  font-size: var(--fs-14);
+  overflow-y: auto;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(2px);
+  z-index: 20;
+}
+
+/* =========================
+   Small Utilities
+   ========================= */
+.hr{
+  height: 1px; background: var(--color-border); border: 0; margin: var(--space-4) 0;
+}
+.mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+/* =========================
+   Responsive Rules
+   ========================= */
+
+/* ≥1200px: generous spacing (desktop-first already) */
+
+/* <900px: keep everything centered and intact */
+@media (max-width: 900px){
+  body{ padding: var(--space-5) var(--space-3) var(--space-10); }
+  #meta-wrap{ gap: var(--space-4); }
+  #score{ font-size: 28px; }
+  #character-upgrade-list{ grid-template-columns: 1fr 1fr; }
+}
+
+/* <600px: compress side paddings; main area priority */
+@media (max-width: 600px){
+  #game-wrap{ gap: var(--space-3); }
+  #meta-wrap{
+    padding: var(--space-2) var(--space-3);
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  #character-upgrade-list{ grid-template-columns: 1fr; }
+  #upgrade-panel{ padding: var(--space-4); }
+  #log-panel{
+    right: 12px; bottom: 12px;
+    width: min(88vw, 320px); height: 200px;
+  }
+}
+
+/* =========================
+   Motion Preferences
+   ========================= */
+@media (prefers-reduced-motion: reduce){
+  *{ transition: none !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+}
