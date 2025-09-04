@@ -6,7 +6,11 @@
         <script src="script.js" defer></script>
     </head>
     <body>
-        <!-- ★ 用 div 包 canvas，方便加邊框 & 置中 -->
+        <div id="title">
+            <h1>Click Game</h1>
+            <span id="description" href = "README.md"> 遊戲說明書 </span>
+        </div>
+
         <div id="game-wrap">
             <canvas id="main-screen" width="800" height="800"></canvas>
             <canvas id="side-screen" width="800" height="300"></canvas>
@@ -22,14 +26,15 @@
         <!-- ★ 將 score 與 click-state 包一起，便於 flex 排版 -->
         <div id="meta-wrap">
             <p id="score">0</p>
-            <p id="click-state"></p>
         </div>
         <!-- ★ 獨立的 log 區塊 -->
         <div id="game-log">
-            <h2>活動紀錄</h2>
             <!-- HTML -->
             <div id="log-panel"></div>
-
         </div>
+
+        <div id="achievement-panel">
+            <h2>成就系統</h2>
+            <div id="achievement-list"></div>
     </body>
 </html>

@@ -17,6 +17,41 @@ const sideCtx = sideCanvas.getContext("2d");
 let sideW = sideCanvas.width = 800;
 let sideH = sideCanvas.height = 300;
 
+// === 設定成就 ===
+let gameStartTime = null;
+let achievements = [
+  {
+    title: "Max Score 100",
+    achieved: false,
+    achieved_time: null,
+    condition : (gameManager) => gameManager.score >= 100
+  },
+  {
+    title: "Max Score 500",
+    achieved: false,
+    achieved_time: null,
+    condition: (gameManager) => gameManager.score >= 500
+  },
+  {
+    title: "Max Score 1000",
+    achieved: false,
+    achieved_time: null,
+    condition: (gameManager) => gameManager.score >= 1000
+  },
+  {
+    title: "Have 5 Jerrys",
+    achieved: false,
+    achieved_time: null,
+    condition: (gameManager) => gameManager.objects.jerrys.length >= 5
+  },
+  {
+    title: "Have 10 Jerrys",
+    achieved: false,
+    achieved_time: null,
+    condition: (gameManager) => gameManager.objects.jerrys.length >= 10
+  },
+];
+
 // === 讀取 Config ===
 
 let charCfgMap = {};               
@@ -48,7 +83,8 @@ let charCfgMap = {};
       c.img.onerror = () => resolve(); // 失敗也繼續
     });
   }));
-
+  gameStartTime = Date.now(); // 遊戲開始時間
+  renderAchievements();              // 預先渲染成就面板
   startGame();                      // cfg 到手且圖 (大致) 載入後才真正啟動
 })();
 
@@ -422,10 +458,9 @@ class GameManager{
     }
 
     updateBoard(){
-        const clickState = document.getElementById("click-state");
         const scoreBoard = document.getElementById("score");
-        clickState.textContent =  `✅ 點中了！ (${this.clickPos.x.toFixed(0)},${this.clickPos.y.toFixed(0)})`;
         scoreBoard.textContent = this.score;
+        updateAchievementPanel(this);
     }
 
 
@@ -779,6 +814,47 @@ function addLog(msg) {
 
   // ★ 自動捲到最底
   logDiv.scrollTop = logDiv.scrollHeight;
+}
+
+// === Achievement Panel ===
+function renderAchievements() {
+
+  const panelElem = document.getElementById('achievement-panel');
+  panelElem.innerHTML = "";
+
+  achievements.forEach(ach => { // ach = {title:"Max Score 100", achieved: false, achieved_time: null}
+    const achDiv = document.createElement("div");
+    if (ach.achieved) {
+      const elapsedMs = ach.achieved_time - gameStartTime;
+      const elapsedSec = Math.floor(elapsedMs / 1000); // 換算成秒
+      const elapsedMin = Math.floor(elapsedSec / 60);
+      const secRemain = elapsedSec % 60;
+      
+      achDiv.textContent = `${ach.title} : 已達成 (耗時 ${elapsedMin}分${secRemain}秒)`;
+      achDiv.style.color = "green";
+    }
+    else {
+      achDiv.textContent = `${ach.title} : 未達成`;
+      achDiv.style.color = "red"; // 未達成成就顯示紅色
+    }
+    panelElem.appendChild(achDiv);
+  });
+
+}
+function updateAchievementPanel(gameManager) {
+
+
+  // check achievements
+  achievements.forEach(ach => {
+    if (!ach.achieved && ach.condition(gameManager)) {
+      ach.achieved = true;
+      ach.achieved_time = Date.now();
+      addLog(`成就達成: ${ach.title}`);
+    }
+  });
+
+  // 重新渲染成就列表
+  renderAchievements();
 }
 
 // 範例：遊戲事件呼叫
