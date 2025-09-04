@@ -27,16 +27,16 @@ let achievements = [
     condition : (gameManager) => gameManager.score >= 100
   },
   {
-    title: "Max Score 500",
-    achieved: false,
-    achieved_time: null,
-    condition: (gameManager) => gameManager.score >= 500
-  },
-  {
     title: "Max Score 1000",
     achieved: false,
     achieved_time: null,
     condition: (gameManager) => gameManager.score >= 1000
+  },
+  {
+    title: "Max Score 10000",
+    achieved: false,
+    achieved_time: null,
+    condition: (gameManager) => gameManager.score >= 10000
   },
   {
     title: "Have 5 Jerrys",
@@ -289,7 +289,7 @@ class Tom{
         this.idx = gameManager.objects.toms.length; // 依照目前 Tom 的數量決定位置
        
         this.pos = {
-          x: this.idx * this.width,
+          x: this.idx * imgWidth,
           y: 0
         }
 
@@ -342,6 +342,7 @@ class Dog{
     if (sm) {
       sm.frameIndex = 0;
       sm.nextFrame = Date.now() + sm.frameDuration;
+      this.draw(); 
     }
   }
 
@@ -355,9 +356,10 @@ class Dog{
         this.setAction("action1");
         render(this.gameManager, charCfgMap);
         addLog(`${this.type} 吃了 ${this.consumeBones} 骨頭，產生了 ${this.gainPoint} 分`);
+        this.gameManager.updateBoard();
       }else{
         this.setAction("action2");
-        addLog(`${this.type} 沒有足夠的骨頭，生氣地去睡覺`);
+        addLog(`${this.type} 沒有足夠的骨頭，Spike 開始生氣了!!!`);
       }
     }
   }
@@ -475,7 +477,7 @@ function render(gameManager,configMap){
     container.innerHTML = ""; // FIX: 重新渲染時先清空，避免重複生成
 
     Object.entries(configMap).forEach(([type, cfg]) => {
-
+        if(type === "Trap") return; // Trap 不顯示在面板上
         const div = document.createElement("div");
 
         div.id = `char-${type}`;
@@ -487,7 +489,7 @@ function render(gameManager,configMap){
 
         if (cfg.unlock) {
             // 已解鎖：顯示升級選項
-            if(Object.keys(cfg.upgradeInfo).length !==0 ){
+            if(type !== "Trap" ){
               
               const upgradeList = document.createElement("ul");
               Object.entries(cfg.upgradeInfo).forEach(([key, upgradeCfg]) => { // key: addAmount, upgradeCfg: {desc:"xxx",price:100...etc}
@@ -733,6 +735,10 @@ function upgradeDog(gameManager, key){
                 config.actionInterval = Math.floor(config.actionInterval * (1 - config.upgradeInfo.upgrade.ratio));
                 config.gainPoint = Math.floor(config.gainPoint * (1 + config.upgradeInfo.upgrade.ratio+ 0.2));
                 config.consumeBones = Math.floor(config.consumeBones * (1 + config.upgradeInfo.upgrade.ratio));
+
+                config.upgradeInfo.buyBones.price = Math.floor(config.upgradeInfo.buyBones.price * (1 + config.upgradeInfo.upgrade.ratio));
+                config.upgradeInfo.buyBones.amount = Math.floor(config.upgradeInfo.buyBones.amount * (1 + config.upgradeInfo.upgrade.ratio));
+                // 重新生成 Dog 物件以應用新配置
                 gameManager.objects.dogs.pop();
                 gameManager.objects.dogs.push(new Dog(charCfgMap["Dog"], gameManager));
                 gameManager.updateBoard();
