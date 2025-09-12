@@ -51,10 +51,98 @@ let achievements = [
     condition: (gameManager) => gameManager.objects.jerrys.length >= 10
   },
 ];
+//  === 新增 Audio Manager ===
+class AudioManager {
+  constructor(cfg) {
+    this.cfg = cfg;
+
+    this.buffers = {};        // { key: [AudioBuffer, ...] }
+    this.lastAt = {};         // { key: timestamp }：節流用
+    this.minGap = {};         // { key: ms }：每種音效最小間隔
+
+  
+    this.unlock = false;
+    this.ctx = null;
+  }
+
+  
+  async initOnFirstGesture(){
+    if(this.unlock) return; // 已解鎖就不重複執行
+
+    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    await this.ctx.resume(); // 確保啟動  
+    this.unlock = true;
+    console.log("AudioContext is ready");
+  }
+
+  async load(){
+    console.log(this.cfg);
+    const keys = Object.keys(this.cfg);
+    const promises = keys.map(async (key)=>{
+      const url = "./static/" + this.cfg[key]['url'];
+      this.setMinGap(key, this.cfg[key]['minGap'] || 0);
+      const res = await fetch(url, {cache:"force-cache"}); // 避免重複下載
+      if(!res.ok) throw new Error(`Fetch failed: ${url}`);
+      const arrayBuffer = await res.arrayBuffer();
+      const audioBuffer = await this.ctx.decodeAudioData(arrayBuffer.slice(0)); // 解碼
+      this.buffers[key] = audioBuffer;
+    });
+
+    await Promise.all(promises);
+    addLog("All audio loaded");
+
+  }
+
+  setMinGap(key, ms) { this.minGap[key] = ms; }
+  play(key, {
+    volume = 1.0, // 0.0 ~ 1.0 : 音量大小
+    rate = 1.0, // 播放速度
+    detune = 0, // 音調，單位為 cents (100 cents = 1 semitone)
+    offset = 0, // 從音訊的某個時間點開始播放，單位為秒
+    duration
+  } = {}) {
+
+    if (!this.unlock || !this.buffers[key]){
+      addLog(`Audio ${key} not ready`);
+      return;
+    };
+
+    // 節流
+    const now = Date.now();
+    const needGap = this.minGap[key] ?? 0;
+    if (now - (this.lastAt[key] || 0) < needGap) return;
+    this.lastAt[key] = now;
+
+    // 建立一次性 source
+    const src = this.ctx.createBufferSource();
+    const buf = this.buffers[key];
+    src.buffer = buf;
+    src.playbackRate.value = rate;
+    if ('detune' in src) src.detune.value = detune;
+
+    const gain = this.ctx.createGain();
+    gain.gain.value = volume;
+
+    src.connect(gain).connect(this.ctx.destination); //ctx.destination 是最終輸出到喇叭的「終端」
+    // 播放結束後自動斷開連接，避免記憶體洩漏
+    src.onended = () => {
+      src.disconnect();
+      gain.disconnect();
+    };
+
+    if (duration != null) src.start(0, offset, duration);
+    else src.start(0, offset);
+  }
+
+
+}
+
+
 
 // === 讀取 Config ===
 
-let charCfgMap = {};               
+let charCfgMap = {};   
+let audio = null;            
 (async function initConfig () {
   const cfgArr = await fetch("./static/config.json").then(r => r.json());
 
@@ -84,9 +172,17 @@ let charCfgMap = {};
     });
   }));
   gameStartTime = Date.now(); // 遊戲開始時間
+
+  audio = new AudioManager(charCfgMap['Audio']);
+  document.addEventListener('pointerdown', async () => {
+    await audio.initOnFirstGesture();
+    await audio.load();
+
+  }, { once: true });
   renderAchievements();              // 預先渲染成就面板
   startGame();                      // cfg 到手且圖 (大致) 載入後才真正啟動
 })();
+
 
 
 
@@ -359,6 +455,7 @@ class Dog{
         this.gameManager.updateBoard();
       }else{
         this.setAction("action2");
+        audio.play("bark");
         addLog(`${this.type} 沒有足夠的骨頭，Spike 開始生氣了!!!`);
       }
     }
@@ -419,11 +516,18 @@ class GameManager{
               if(trap.isHit(this.clickPos)){
                 this.score = this.score * (trap.reward / (-100));
                 addLog(`點中了 Trap HAHA！ (${this.clickPos.x.toFixed(0)},${this.clickPos.y.toFixed(0)})`);
+                audio.play("scream",{volume:0.01,duration:1.0});
                 this.updateBoard();
               }
             })
             
         })
+
+        // point per second (PPS) calculation
+        setInterval(() => {
+          const ppsElem = document.getElementById("pps");
+          ppsElem.textContent = `${(this.score / ((Date.now() - gameStartTime) / 1000)).toFixed(1)} pts/s`;
+        }, 1000); // 每 1 秒更新一次
 
         this.gameLoop = () => {
             ctx.clearRect(0, 0, w, h);
@@ -477,7 +581,7 @@ function render(gameManager,configMap){
     container.innerHTML = ""; // FIX: 重新渲染時先清空，避免重複生成
 
     Object.entries(configMap).forEach(([type, cfg]) => {
-        if(type === "Trap") return; // Trap 不顯示在面板上
+        if(type === "Trap" || type === "Audio") return; // Trap 不顯示在面板上
         const div = document.createElement("div");
 
         div.id = `char-${type}`;

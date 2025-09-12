@@ -1,5 +1,16 @@
 [
   {
+    "type": "Audio", 
+    "bark": {
+      "url": "bark.mp3",
+      "minGap":500
+    },
+    "scream": {
+      "url": "scream.mp3",
+      "minGap":500
+    }
+  },
+  {
     "type": "Jerry",
     "img": "jerry.png",
     "unlock":true,
